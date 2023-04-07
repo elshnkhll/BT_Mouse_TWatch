@@ -39,3 +39,97 @@ Dependencies:
   2. https://github.com/Xinyuan-LilyGO/TTGO_TWatch_Library
 
 */
+
+
+
+#include <BleMouse.h>
+#include "config.h"
+
+
+BleMouse bleMouse("TTGO BT Mouse", "LilyGO");
+TTGOClass *ttgo;
+AXP20X_Class *power;
+
+char buf[128];
+
+bool touch_down = false;
+bool moved = true;
+
+int16_t x, y;
+int16_t xx = 120, yy = 120;
+
+void setup() {
+
+  Serial.begin(115200);
+  Serial.println("Starting...");
+  bleMouse.begin();
+
+  ttgo = TTGOClass::getWatch();
+  ttgo->begin();
+  ttgo->openBL();  // backlight ON
+
+
+  power = ttgo->power;
+  int bat_prcntg = power->getBattVoltage() / 100;
+  bleMouse.setBatteryLevel( bat_prcntg );
+
+  ttgo->tft->fillScreen(TFT_BLACK);
+  ttgo->tft->setTextFont(2);
+  ttgo->tft->setTextColor(TFT_WHITE, TFT_BLACK);
+  ttgo->tft->drawString("T-Watch Touch Test", 62, 90);
+  delay(1000);
+
+  ttgo->closeBL(); // backlight OFF
+
+}
+
+void loop() {
+
+  unsigned long startTime;
+
+  if (digitalRead(TOUCH_INT) == LOW) {
+    if (ttgo->getTouch(x, y)) {
+
+      if ( !touch_down ) {
+        xx = x;
+        yy = y;
+        touch_down = true;
+        moved = false;
+        Serial.print("[");
+        delay(50);
+      } else {
+        moved = true;
+        sprintf(buf, "x:%03d  y:%03d", x, y);
+        // snprintf(buf, 128, "V:%.2f ", power->getBattVoltage() / 100 );
+        ttgo->tft->drawString(buf, 80, 118);
+        if (bleMouse.isConnected()) {
+          startTime = millis();
+          while (millis() < startTime + 50) {
+            bleMouse.move( (x - xx), (y - yy));
+            delay(5);
+          }
+          xx = x;
+          yy = y;
+        }
+      }
+    } else {
+      if ( touch_down ) {
+        if ( !moved ) {
+          if ( x < 120 ) {
+            bleMouse.click( MOUSE_LEFT );
+          } else {
+            bleMouse.click( MOUSE_RIGHT );
+          }
+        }
+        Serial.println("]");
+        touch_down = false;
+      }
+    }
+  }
+
+  int bat_prcntg = power->getBattVoltage() / 100;
+  bleMouse.setBatteryLevel( bat_prcntg );
+
+  delay(50);
+}
+
