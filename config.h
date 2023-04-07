@@ -6,4 +6,4 @@
 //// #define LILYGO_WATCH_BLOCK
 // NOT SUPPORT ...
 
-#include <LilyGoWatch.h>
+#include <LilyGoWatch.h>                  // Dependency: https://github.com/Xinyuan-LilyGO/TTGO_TWatch_Library
