@@ -99,12 +99,12 @@ void loop() {
         delay(50);
       } else {
         moved = true;
-        sprintf(buf, "x:%03d  y:%03d", x, y);
+        // sprintf(buf, "x:%03d  y:%03d", x, y);
         // snprintf(buf, 128, "V:%.2f ", power->getBattVoltage() / 100 );
-        ttgo->tft->drawString(buf, 80, 118);
+        // ttgo->tft->drawString(buf, 80, 118);
         if (bleMouse.isConnected()) {
           startTime = millis();
-          while (millis() < startTime + 50) {
+          while (millis() < startTime + 30) {
             bleMouse.move( (x - xx), (y - yy));
             delay(5);
           }
